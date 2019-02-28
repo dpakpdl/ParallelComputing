@@ -23,8 +23,8 @@ for line in sys.stdin:
 
 # Reducer
 for hour_of_day in time_power.keys():
-    average_power = sum(time_power[hour_of_day]) * 1.0 /float(num_of_lines)
-    print '%s\t%s' % (hour_of_day, average_power)
+    average_power = sum(time_power[hour_of_day]) * 1.0 /len(time_power[hour_of_day])
+    print '%s\t%s\t%s' % (hour_of_day, average_power, len(time_power[hour_of_day]))
 
 endtime = time.time()
 # print ("Endtime: %s" %endtime)

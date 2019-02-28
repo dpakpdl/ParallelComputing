@@ -77,7 +77,7 @@ public class Worker implements Runnable {
     }
 
     public static void readAndFragment() throws IOException {
-        int CHUNK_SIZE = 69*500000; //10MB chunk
+        int CHUNK_SIZE = 69*500000;
 //        int CHUNK_SIZE = 141400320;
         File willBeRead = new File("/Users/deepakpaudel/mycodes/ParallelComputing/dataset/household_power_consumption1.txt");
 //        File willBeRead = new File("/Users/deepakpaudel/mycodes/ParallelComputing/dataset/test.txt");
@@ -157,6 +157,7 @@ public class Worker implements Runnable {
             float defaultValue = 0;
             float numberOfLines = lines.length;
             Map<String, Float> hourActivePower = new HashMap<String, Float>();
+
             for (String line : lines) {
                 String[] data = line.split(";");
                 String hour = "";
@@ -168,12 +169,14 @@ public class Worker implements Runnable {
                 float activePower = Float.parseFloat(data[2]);
                 if (hourActivePower.get(hour) == null) {
                     hourActivePower.put(hour, defaultValue);
+                    hourActivePower.put("count".concat(hour), defaultValue);
+                }
+                else {
+                    String counter = "count".concat(hour);
+                    hourActivePower.put(counter, hourActivePower.get(counter) + 1);
                 }
                 hourActivePower.put(hour, hourActivePower.get(hour) + activePower);
             }
-            hourActivePower.put("numberOfLines", numberOfLines);
-//            System.out.println("Power Mapping: " +hourActivePower.toString());
-
             String fileName = lineQueue.take();
             write(hourActivePower.toString().getBytes(), fileName);
 
@@ -274,14 +277,15 @@ public class Worker implements Runnable {
                 }
             }
             finalData = hourActivePower.toString();
-            Float totalLength = hourActivePower.get(numberOfLines);
-            hourActivePower.remove(numberOfLines);
-//            System.out.println("totalLength: "+totalLength);
-
+            String counter = "count";
             for (Map.Entry<String, Float> entry : hourActivePower.entrySet()) {
                 String key = entry.getKey();
-                Float value = entry.getValue() / totalLength;
-                hourActivePower.put(key, value);
+                if (!key.contains(counter.toLowerCase())){
+                    String mykey = key.replaceAll("\\s","");
+                    String count = " count".concat(mykey);
+                    Float value = entry.getValue() / hourActivePower.get(count);
+                    hourActivePower.put(key, value);
+                }
             }
             finalData = hourActivePower.toString();
             System.out.println(finalData);
